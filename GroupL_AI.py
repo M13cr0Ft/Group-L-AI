@@ -52,7 +52,7 @@ def minimax_min_node(board, color, DEPTH_LIMIT, depth, ab):
         if move == (7,7) or move == (0,0) or move == (7,0) or move == (0,7):
           best_score -= 2
         if move==(1,0) or move==(1,1) or move==(0,1) or move==(6,0) or move==(6,1) or move==(7,1) or move==(0,6) or move==(1,6) or move==(1,7) or move==(6,7) or move==(6,6) or move==(7,6):
-          best_score -= 2
+          best_score += 2
       if best_score < ab:
         return ab
     return best_score 
@@ -80,7 +80,7 @@ def minimax_max_node(board, color, DEPTH_LIMIT, depth, ab):
         if move == (7,7) or move == (0,0) or move == (7,0) or move == (0,7):
           best_score += 4
         if move==(1,0) or move==(1,1) or move==(0,1) or move==(6,0) or move==(6,1) or move==(7,1) or move==(0,6) or move==(1,6) or move==(1,7) or move==(6,7) or move==(6,6) or move==(7,6):
-          best_score += 2
+          best_score -= 2
       if best_score > ab:
         return ab
     return best_score 
