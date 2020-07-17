@@ -1,98 +1,106 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*
 
-
 """
 COMS W4701 Artificial Intelligence - Programming Homework 2
 
 An AI player for Othello. This is the template file that you need to  
 complete and submit. 
 
-@author: YOUR NAME AND UNI 
+@author: Armaan Bassi, Suwei Ma, Yuval Vaknin
 """
 
 import random
 import sys
 import time
-import math 
+import math
 
 # You can use the functions in othello_shared to write your AI 
 from othello_shared import find_lines, get_possible_moves, get_score, play_move
 
 def compute_utility(board, color):
-  score = get_score(board)
-  if color == 1: # black 
-    return score[1]-score[2]
-  else: #white
-    return score[2]-score[1]
-
-def colorswap(color):
-  if color == 2:
-    return 1
-  else:
-    return 2
+    score = get_score(board)
+    #returns tuple (# of dark disks, # of light disks)
+    if color == 1:
+      return score[0]-score[1]
+    else:
+      return score[1]-score[0]
 
 ############ MINIMAX ###############################
-seen = set();
-def minimax_min_node(board, color, depth, MAX_DEPTH, ab):
-  if board in seen:
-    return ab;
-  else seen.add(board);
-  #lets store the possible moves in a list 
-  possibleMoves = get_possible_moves(board, color)
-  #this is fine 
-  if len(possibleMoves) == 0:    
-    return compute_utility(board, colorswap(color))
-  worstscore = math.inf
 
-  #consider: 
-  #for move in possibleMoves:
-  for move in possibleMoves:
-    board1 = play_move(board, color, move[0], move[1])
-    score = minimax_max_node(board1, colorswap(color), MAX_DEPTH, ab)
-    if score < worstscore:
-      worstscore = score
-    if worstscore < ab:
-      return worstscore;
-  return worstscore
+def minimax_min_node(board, color, DEPTH_LIMIT, depth):
+    opp_color = 1 if color == 2 else 2  
+    possible_moves = get_possible_moves(board, opp_color) 
+    if depth >= DEPTH_LIMIT: 
+      return compute_utility(board, color) # Or compute a different heuristic function 
 
+    if not possible_moves: 
+      return compute_utility(board, color)
 
-def minimax_max_node(board, color, depth, MAX_DEPTH, ab):
-  if board in seen:
-    return ab;
-  else seen.add(board);
+    best_move = None
+    best_score = math.inf
+    for move in possible_moves: 
+      new_board = play_move(board, opp_color, move[0], move[1])
+      score = minimax_max_node(new_board, color, DEPTH_LIMIT, depth+1)
+      if score < best_score: 
+        best_move = move
+        best_score = score
+        if move == (7,7) or move == (0,0) or move == (7,0) or move == (0,7):
+          best_score -= 2
+        if move==(1,0) or move==(1,1) or move==(0,1) or move==(6,0) or move==(6,1) or move==(7,1) or move==(0,6) or move==(1,6) or move==(1,7) or move==(6,7) or move==(6,6) or move==(7,6):
+          best_score -= 2
+    return best_score 
+      
+def minimax_max_node(board, color, DEPTH_LIMIT, depth):
+
+    possible_moves = get_possible_moves(board, color)
+    if depth >= DEPTH_LIMIT: 
+      return compute_utility(board, color) # Or compute a different heuristic function 
+
+    if not possible_moves: 
+      return compute_utility(board, color) 
+
+    best_move = None
+    best_score = -math.inf
+    for move in possible_moves: 
+      new_board = play_move(board, color, move[0], move[1])
+      score = minimax_min_node(new_board, color, DEPTH_LIMIT, depth+1)
+      if score > best_score: 
+        best_move = move
+        best_score = score
+        if move == (7,7) or move == (0,0) or move == (7,0) or move == (0,7):
+          best_score += 2
+        if move==(1,0) or move==(1,1) or move==(0,1) or move==(6,0) or move==(6,1) or move==(7,1) or move==(0,6) or move==(1,6) or move==(1,7) or move==(6,7) or move==(6,6) or move==(7,6):
+          best_score += 2
+
+    return best_score 
   
-  possibleMoves = get_possible_moves(board, color)
-  if len(possibleMoves) == 0:
-    return compute_utility(board, color)
-  bestscore = -math.inf
-  for move in possibleMoves:
-    board1 = play_move(board, color, move[0], move[1])
-    score = minimax_min_node(board1, colorswap(color), MAX_DEPTH, ab)
-    if score > bestscore:
-      bestscore = score
-    if bestscore > ab:
-      return bestscore;
-  return bestscore
-
-    
 def select_move_minimax(board, color):
     """
     Given a board and a player color, decide on a move. 
     The return value is a tuple of integers (i,j), where
     i is the column and j is the row on the board.  
     """
-    MAX_DEPTH=5
-    moves = get_possible_moves(board, color)
-    bestMoveScore = -math.inf
-    bestMove = moves[0]
-    for i in moves:
-      board1 = play_move(board, color, i[0], i[1])
-      score = minimax_min_node(board1,color,1, 0, MAX_DEPTH)
-      if score>bestScore:
-        bestScore=score
-        bestMove=i
-    return bestMove
+    #move = tuple --> (COLUMN, ROW)
+    #play_move(board, color, move)
+
+    DEPTH_LIMIT = 3
+
+    possible_moves = get_possible_moves(board, color) 
+
+    best_move = None
+    best_score = -math.inf
+    for move in possible_moves: 
+      new_board = play_move(board, color, move[0], move[1])
+      score = minimax_min_node(new_board, color, DEPTH_LIMIT, 0)
+      if score > best_score: 
+        best_move = move
+        best_score = score
+
+    return best_move 
+
+
+
     
 ############ ALPHA-BETA PRUNING #####################
 
@@ -118,7 +126,7 @@ def run_ai():
     Then it repeatedly receives the current score and current board state
     until the game is over. 
     """
-    print("Minimax AI") # First line is the name of this AI  
+    print("Othello AI") # First line is the name of this AI  
     color = int(input()) # Then we read the color: 1 for dark (goes first), 
                          # 2 for light. 
 
