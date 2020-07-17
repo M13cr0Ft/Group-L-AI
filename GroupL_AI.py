@@ -20,17 +20,24 @@ from othello_shared import find_lines, get_possible_moves, get_score, play_move
 
 def compute_utility(board, color):
     score = get_score(board)
+    #returns tuple (# of dark disks, # of light disks)
     if color == 1:
       return score[0]-score[1]
     else:
       return score[1]-score[0]
 
 ############ MINIMAX ###############################
-def minimax_min_node(board, color, DEPTH_LIMIT, depth):
+seen = set();
+def minimax_min_node(board, color, DEPTH_LIMIT, depth, ab):
+    if board in seen:
+      return ab;
+    else:
+      seen.add(board);
     opp_color = 1 if color == 2 else 2  
     possible_moves = get_possible_moves(board, opp_color) 
     if depth >= DEPTH_LIMIT: 
-      return compute_utility(board, color) 
+      return compute_utility(board, color) # Or compute a different heuristic function 
+
     if not possible_moves: 
       return compute_utility(board, color)
 
@@ -38,7 +45,7 @@ def minimax_min_node(board, color, DEPTH_LIMIT, depth):
     best_score = math.inf
     for move in possible_moves: 
       new_board = play_move(board, opp_color, move[0], move[1])
-      score = minimax_max_node(new_board, color, DEPTH_LIMIT, depth+1)
+      score = minimax_max_node(new_board, color, DEPTH_LIMIT, depth+1, best_score)
       if score < best_score: 
         best_move = move
         best_score = score
@@ -46,13 +53,18 @@ def minimax_min_node(board, color, DEPTH_LIMIT, depth):
           best_score -= 2
         if move==(1,0) or move==(1,1) or move==(0,1) or move==(6,0) or move==(6,1) or move==(7,1) or move==(0,6) or move==(1,6) or move==(1,7) or move==(6,7) or move==(6,6) or move==(7,6):
           best_score -= 2
+      if best_score < ab:
+        return ab
     return best_score 
       
-def minimax_max_node(board, color, DEPTH_LIMIT, depth):
-
+def minimax_max_node(board, color, DEPTH_LIMIT, depth, ab):
+    if board in seen:
+      return ab;
+    else:
+      seen.add(board);
     possible_moves = get_possible_moves(board, color)
     if depth >= DEPTH_LIMIT: 
-      return compute_utility(board, color)
+      return compute_utility(board, color) # Or compute a different heuristic function 
 
     if not possible_moves: 
       return compute_utility(board, color) 
@@ -61,39 +73,46 @@ def minimax_max_node(board, color, DEPTH_LIMIT, depth):
     best_score = -math.inf
     for move in possible_moves: 
       new_board = play_move(board, color, move[0], move[1])
-      score = minimax_min_node(new_board, color, DEPTH_LIMIT, depth+1)
+      score = minimax_min_node(new_board, color, DEPTH_LIMIT, depth+1, best_score)
       if score > best_score: 
         best_move = move
         best_score = score
         if move == (7,7) or move == (0,0) or move == (7,0) or move == (0,7):
-          best_score += 2
+          best_score += 4
         if move==(1,0) or move==(1,1) or move==(0,1) or move==(6,0) or move==(6,1) or move==(7,1) or move==(0,6) or move==(1,6) or move==(1,7) or move==(6,7) or move==(6,6) or move==(7,6):
           best_score += 2
-
+      if best_score > ab:
+        return ab
     return best_score 
   
 def select_move_minimax(board, color):
+    global seen;
+    seen = set()
     """
     Given a board and a player color, decide on a move. 
     The return value is a tuple of integers (i,j), where
     i is the column and j is the row on the board.  
     """
+    #move = tuple --> (COLUMN, ROW)
+    #play_move(board, color, move)
 
-    DEPTH_LIMIT = 5
-
+    DEPTH_LIMIT = 4
     possible_moves = get_possible_moves(board, color) 
 
     best_move = None
     best_score = -math.inf
     for move in possible_moves: 
       new_board = play_move(board, color, move[0], move[1])
-      score = minimax_min_node(new_board, color, DEPTH_LIMIT, 0)
+      score = minimax_min_node(new_board, color, DEPTH_LIMIT, 0, best_score)
       if score > best_score: 
         best_move = move
         best_score = score
 
     return best_move 
 
+
+
+    
 ############ ALPHA-BETA PRUNING #####################
 
 #alphabeta_min_node(board, color, alpha, beta, level, limit)
