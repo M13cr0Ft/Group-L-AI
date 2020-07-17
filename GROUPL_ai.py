@@ -20,20 +20,17 @@ from othello_shared import find_lines, get_possible_moves, get_score, play_move
 
 def compute_utility(board, color):
     score = get_score(board)
-    #returns tuple (# of dark disks, # of light disks)
     if color == 1:
       return score[0]-score[1]
     else:
       return score[1]-score[0]
 
 ############ MINIMAX ###############################
-
 def minimax_min_node(board, color, DEPTH_LIMIT, depth):
     opp_color = 1 if color == 2 else 2  
     possible_moves = get_possible_moves(board, opp_color) 
     if depth >= DEPTH_LIMIT: 
-      return compute_utility(board, color) # Or compute a different heuristic function 
-
+      return compute_utility(board, color) 
     if not possible_moves: 
       return compute_utility(board, color)
 
@@ -55,7 +52,7 @@ def minimax_max_node(board, color, DEPTH_LIMIT, depth):
 
     possible_moves = get_possible_moves(board, color)
     if depth >= DEPTH_LIMIT: 
-      return compute_utility(board, color) # Or compute a different heuristic function 
+      return compute_utility(board, color)
 
     if not possible_moves: 
       return compute_utility(board, color) 
@@ -81,10 +78,8 @@ def select_move_minimax(board, color):
     The return value is a tuple of integers (i,j), where
     i is the column and j is the row on the board.  
     """
-    #move = tuple --> (COLUMN, ROW)
-    #play_move(board, color, move)
 
-    DEPTH_LIMIT = 3
+    DEPTH_LIMIT = 5
 
     possible_moves = get_possible_moves(board, color) 
 
@@ -99,9 +94,6 @@ def select_move_minimax(board, color):
 
     return best_move 
 
-
-
-    
 ############ ALPHA-BETA PRUNING #####################
 
 #alphabeta_min_node(board, color, alpha, beta, level, limit)
