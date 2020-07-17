@@ -32,38 +32,56 @@ def colorswap(color):
   else:
     return 2
 
+def compute_utility(board, color):
+
+  p1score, p2score = get_score(board)
+  if color==1: 
+    return p1score
+  else: 
+    return p2score 
+
 
 ############ MINIMAX ###############################
-
-def minimax_min_node(board, color):
-  
+seen = set();
+def minimax_min_node(board, color, depth, MAX_DEPTH, ab):
+  if board in seen:
+    return ab;
+  else seen.add(board);
   #lets store the possible moves in a list 
   possibleMoves = get_possible_moves(board, color)
   #this is fine 
-  if len(possibleMoves) == 0:
-    return get_score(board)
+  if len(possibleMoves) == 0:    
+    return compute_utility(board, colorswap(color))
   worstscore = math.inf
 
   #consider: 
   #for move in possibleMoves:
   for move in possibleMoves:
     board1 = play_move(board, color, move[0], move[1])
-    score = minimax_max_node(board1, colorswap(color))
+    score = minimax_max_node(board1, colorswap(color), MAX_DEPTH, ab)
     if score < worstscore:
       worstscore = score
+    if worstscore < ab:
+      return worstscore;
   return worstscore
 
 
-def minimax_max_node(board, color):
+def minimax_max_node(board, color, depth, MAX_DEPTH, ab):
+  if board in seen:
+    return ab;
+  else seen.add(board);
+  
   possibleMoves = get_possible_moves(board, color)
   if len(possibleMoves) == 0:
-    return get_score(board)
+    return compute_utility(board, color)
   bestscore = -math.inf
   for move in possibleMoves:
     board1 = play_move(board, color, move[0], move[1])
-    score = minimax_min_node(board1, colorswap(color))
+    score = minimax_min_node(board1, colorswap(color), MAX_DEPTH, ab)
     if score > bestscore:
       bestscore = score
+    if bestscore > ab:
+      return bestscore;
   return bestscore
 
     
@@ -73,14 +91,15 @@ def select_move_minimax(board, color):
     The return value is a tuple of integers (i,j), where
     i is the column and j is the row on the board.  
     """
+    MAX_DEPTH=5
     moves = get_possible_moves(board, color)
     bestMoveScore = -math.inf
     bestMove = moves[0]
     for i in moves:
       board1 = play_move(board, color, i[0], i[1])
-      score = minimax_min_node(board1,color,1)
-      if score>bestMoveScore:
-        bestMoveScore=score
+      score = minimax_min_node(board1,color,1, 0, MAX_DEPTH)
+      if score>bestScore:
+        bestScore=score
         bestMove=i
     return bestMove
     
