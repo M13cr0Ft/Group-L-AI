@@ -32,15 +32,6 @@ def colorswap(color):
   else:
     return 2
 
-def compute_utility(board, color):
-
-  p1score, p2score = get_score(board)
-  if color==1: 
-    return p1score
-  else: 
-    return p2score 
-
-
 ############ MINIMAX ###############################
 seen = set();
 def minimax_min_node(board, color, depth, MAX_DEPTH, ab):
